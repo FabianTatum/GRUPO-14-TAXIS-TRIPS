@@ -11,6 +11,7 @@ export PG_DATABASE=ny_taxi
 curl -o ./in/yellow_trips_2018-01.parquet https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2018-01.parquet
 
 ### Descarga de los datos de tiempo
+echo "----------SCRIPT WEATHER-----------"
 python3 ./script/python/extract.py
 
 ### Transformacion de datos
@@ -52,6 +53,10 @@ echo "Datos de icon"
 psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d $PG_DATABASE -c "\copy PUBLIC.icon FROM \
 '$MYHOME/out/icon.csv' DELIMITER ',' CSV HEADER;"
 
+echo "Datos de borough"
+psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d $PG_DATABASE -c "\copy PUBLIC.borough FROM \
+'$MYHOME/out/borough.csv' DELIMITER ',' CSV HEADER;"
+
 echo "Datos de location"
 psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d $PG_DATABASE -c "\copy PUBLIC.location FROM \
 '$MYHOME/out/location.csv' DELIMITER ',' CSV HEADER;"
@@ -83,4 +88,4 @@ echo "-----------------------------------------"
 echo "||||   CREACION DE LAS RELACIONES    ||||"
 echo "-----------------------------------------"
 
-#psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d $PG_DATABASE -f ./script/sql/relationships.sql
+psql -h $PG_HOST -p $PG_PORT -U $PG_USER -d $PG_DATABASE -f ./script/sql/relationships.sql

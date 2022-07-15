@@ -7,10 +7,14 @@ import csv
 import codecs
 import pandas as pd
 
+
+print('--------------------------------------')
+print('|||         DESCARGA WEATHER       |||')
+print('--------------------------------------')
+
 initial_date = '2018-01-01'
 final_date = '2018-01-01'
-url = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/New%20York/" + initial_date + "/" + final_date + "?unitGroup=metric&include=hours&key=HB4HE49PF5XCRSEHAULTVM73D&contentType=csv"
-
+url = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/New%20York/" + initial_date + "/" + final_date + "?unitGroup=metric&include=hours&key=FWHEEXHLDYZDXTKVGHP2SSCWL&contentType=csv"
 try:
     #ResultBytes = urllib.request.urlopen("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/New%20York/2018-01-01/2018-01-01?unitGroup=metric&include=hours&key=HB4HE49PF5XCRSEHAULTVM73D&contentType=csv")
     ResultBytes = request.urlopen(url)

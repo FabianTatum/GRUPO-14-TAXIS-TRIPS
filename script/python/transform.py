@@ -68,11 +68,14 @@ df_copy.rename(columns={ 'VendorID':'IdVendor','RatecodeID':'IdRatecode','PULoca
 
 
 taxi_trip_2018 = df_copy[['IdTaxis','IdVendor','tpep_pickup_datetime','tpep_dropoff_datetime','Travel_time','IdRatecode','IdPULocation'
-                           ,'IdDOLocation','IdPayment_type','fare_amount','extra','mta_tax','tip_amount','improvement_surcharge','total_amount_1']]
+                           ,'IdDOLocation','IdPayment_type', 'fare_amount','extra','mta_tax','tip_amount','improvement_surcharge','total_amount_1']]
 
 to_str = lambda x: str(x)
 
 taxi_trip_2018['Travel_time'] = taxi_trip_2018['Travel_time'].apply(to_str)
+
+dx = taxi_trip_2018[taxi_trip_2018['IdRatecode'] > 10].index
+taxi_trip_2018.drop(index=dx, inplace=True)
 
 print('---------------------------------')
 print('|||    CONVIRTIENDO TRIPS     |||')
@@ -111,6 +114,8 @@ Ratecode={  1:'Tarifa estándar',
             6:'paseo en grupo'}
 
 df_Ratecode = pd.DataFrame([[key, Ratecode[key]] for key in Ratecode.keys()], columns=['IdRatecode', 'Name_ratecode'])
+
+
 with open(table, "a") as f:
     f.write('\n' + pd.io.sql.get_schema(df_Ratecode, name='ratecode') + '\n' + ';')
 df_Ratecode.to_csv('./out/ratecode.csv', index=False)
@@ -134,7 +139,7 @@ with open(table, "a") as f:
 df_payment.to_csv('./out/payment.csv', index=False)
 
 print('---------------------------------')
-print('|||   CONVIRTIENDO LOCATION   |||')
+print('|||   CONVIRTIENDO BOROUGH    |||')
 print('---------------------------------')
 # TODO: Tabla Location
 df_copy.rename(columns={'index':'taxis_id'}, inplace=True)
@@ -143,21 +148,26 @@ Borough_dic = [ {'IdBorough':1,'Borough':'EWR','Latitude':40.6895314,'Longitude'
                 {'IdBorough':2,'Borough':'Queens','Latitude':40.742054,'Longitude':-73.769417},
                 {'IdBorough':3,'Borough':'Bronx','Latitude':40.837048,'Longitude':-73.865433},
                 {'IdBorough':4,'Borough':'Manhattan','Latitude':40.776676,'Longitude':-73.971321},
-                {'IdBorough':4,'Borough':'Staten Island','Latitude':40.579021,'Longitude':-74.151535},
-                {'IdBorough':6,'Borough':'Brooklyn','Latitude':40.650002,'Longitude':-73.949997}]
+                {'IdBorough':5,'Borough':'Staten Island','Latitude':40.579021,'Longitude':-74.151535},
+                {'IdBorough':6,'Borough':'Brooklyn','Latitude':40.650002,'Longitude':-73.949997},
+                {'IdBorough':7,'Borough':'Unknown','Latitude':0.0,'Longitude':0.0}]
 
 Borough = pd.DataFrame(Borough_dic)
+with open(table, "a") as f:
+    f.write('\n' + pd.io.sql.get_schema(Borough, name='borough') + ';' + '\n' )
+Borough.to_csv('./out/borough.csv', index=False)
+
 
 def algo(params):
-    try:
-        return Borough.IdBorough[Borough.Borough== params].iloc[0]
-    except:
-        return 7
+    return Borough.IdBorough[Borough.Borough== params].iloc[0]
 
 df_Taxi_zone.Borough = df_Taxi_zone.Borough.apply(algo)
 df_Taxi_zone.rename(columns={'Borough':'IdBorough', 'LocationID': 'IdLocation'}, inplace=True)
 df_Taxi_zone.drop('service_zone',axis=1 ,inplace=True)
 
+print('---------------------------------')
+print('|||   CONVIRTIENDO LOCATION   |||')
+print('---------------------------------')
 Location = df_Taxi_zone.copy()
 with open(table, "a") as f:
     f.write('\n' + pd.io.sql.get_schema(Location, name='location') + ';' + '\n' )
@@ -184,16 +194,14 @@ calendar.to_csv('./out/calendar.csv', index=False)
 '''
 calendar.rename(columns={'id':'IdCalendar'}, inplace=True)
 
-def id_tabla(params):
-    return calendar.IdCalendar[calendar.date == str(params).split(' ')[0]].loc[0]
-
 type(calendar.IdCalendar[calendar.date == str('1/1/2018').split(' ')[0]].loc[0])
 
 taxi_trip_2018['IdCalendar']= 0
 
-taxi_trip_2018.head(2)
-
 taxi_trip_2018.IdCalendar = taxi_trip_2018.tpep_dropoff_datetime.apply(id_tabla)
 
-taxi_trip_2018
+# subescribo los valores del df "taxi_trip_2018" de la columna "borough" y le aplico un nuevo valores con la funcion creada arriba
+taxi_trip_2018.Borough = taxi_trip_2018.Borough.apply(algo)
+# Cambio el nombre de la columna "Borough" 
+taxi_trip_2018.rename(columns={'Borough':'IdBorough'}, inplace=True)
 '''
