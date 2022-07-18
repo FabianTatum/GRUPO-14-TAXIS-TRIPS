@@ -6,12 +6,11 @@ import sys
 import csv
 import codecs
 import pandas as pd
+from datetime import datetime as dt
 
 
-print('--------------------------------------')
-print('|||         DESCARGA WEATHER       |||')
-print('--------------------------------------')
 
+print(f'[{str(dt.now())[:19]}] - Search data from source...')
 initial_date = '2018-01-01'
 final_date = '2018-01-01'
 url = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/New%20York/" + initial_date + "/" + final_date + "?unitGroup=metric&include=hours&key=FWHEEXHLDYZDXTKVGHP2SSCWL&contentType=csv"
@@ -114,10 +113,14 @@ table = './script/sql/schema.sql'
 with open(table, 'a') as f:
     f.write('\n' + pd.io.sql.get_schema(df, name='weather') + '\n' + ';')
 df.to_csv('./out/weather.csv', index=False)
+print(f'[{str(dt.now())[:19]}] - Extract data from weather successfuly.')
 with open(table, 'a') as f:
     f.write('\n' + pd.io.sql.get_schema(icon, name='icon') + '\n' + ';')
 icon.to_csv('./out/icon.csv',  index=False)
+print(f'[{str(dt.now())[:19]}] - Extract data from icon successfuly.')
 with open(table, 'a') as f:
     f.write('\n' + pd.io.sql.get_schema(condition, name='condition') + '\n' + ';')
 condition.to_csv('./out/condition.csv', index=False)
+print(f'[{str(dt.now())[:19]}] - Extract data from condition successfuly.')
 
+print(f'[{str(dt.now())[:19]}] - EXTRACT DATA FROM SOURCE SUCCESSFULY')
