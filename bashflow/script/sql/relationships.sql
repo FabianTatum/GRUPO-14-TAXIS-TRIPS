@@ -13,8 +13,6 @@ ALTER TABLE "weather"
 ADD CONSTRAINT "weather_icon_fk"
 FOREIGN KEY ("IdIcon") 
 REFERENCES "icon"("IdIcon");
-\d weather
-
 
 -- Primary keys Trips
 ALTER TABLE "taxi_trips" ADD PRIMARY KEY ("IdTaxis");
@@ -54,4 +52,5 @@ ADD CONSTRAINT "taxitrips_IdPULocation_fk"
 FOREIGN KEY ("IdPULocation") 
 REFERENCES "location"("IdLocation");
 
+\d weather
 \d taxi_trips

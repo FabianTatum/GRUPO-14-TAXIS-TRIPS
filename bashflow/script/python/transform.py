@@ -3,19 +3,14 @@
 import pandas as pd
 import numpy as np
 #from simpledbf import Dbf5
-import datetime as date 
+from datetime import datetime as dt
 
-print('-----------------------------------')
-print('|||     CARGANDO EN PARQUET     |||')
-print('-----------------------------------')
-
+print(f'[{str(dt.now())[:19]}] - WARNING: Parquet charge in memory initialized !!!')
+print(f'\n Please wait...\n')
 df = pd.read_parquet('./in/yellow_trips_2018-01.parquet')
+print(f'[{str(dt.now())[:19]}] - SUCCESS: Parquet charge in memory completed.\n')
 
-# del df
-
-print('PARQUET CSV CON EXITO')
-
-print(df.head(5))
+print(f'[{str(dt.now())[:19]}] - Initialized charge of Incremental in 50000.')
 
 df_copy = df.sample(500000)
 
@@ -24,6 +19,7 @@ df_copy['total_amount_1'] = df_copy.total_amount - df_copy.tolls_amount - df_cop
 
 df_copy.drop(['congestion_surcharge','airport_fee'], axis=1, inplace=True)
 
+print(f'[{str(dt.now())[:19]}] - TRANSFORM TRIPS DATA INITIZALIZED. \n')
 
 # creo nueva columna del tiempo de vieja desde que sube al taxis hasta que baja
 df_copy['Travel_time'] = df_copy.tpep_dropoff_datetime - df_copy.tpep_pickup_datetime
@@ -77,20 +73,15 @@ taxi_trip_2018['Travel_time'] = taxi_trip_2018['Travel_time'].apply(to_str)
 dx = taxi_trip_2018[taxi_trip_2018['IdRatecode'] > 10].index
 taxi_trip_2018.drop(index=dx, inplace=True)
 
-print('---------------------------------')
-print('|||    CONVIRTIENDO TRIPS     |||')
-print('---------------------------------')
-
 table = './script/sql/schema.sql'
 # TODO: Tabla de Viajes
 print('Convert to csv Taxi Trips')
 with open(table, "a") as f:
     f.write('\n' + pd.io.sql.get_schema(taxi_trip_2018, name='taxi_trips') + ';' + '\n')
 taxi_trip_2018.to_csv('./out/taxi_trips.csv', index=False)
+print(f'[{str(dt.now())[:19]}] - TRANSFORM TRIPS DATA SUCCESSFULY.')
 
-print('----------------------------------')
-print('|||     CONVIRTIENDO VENDOR    |||')
-print('----------------------------------')
+print(f'[{str(dt.now())[:19]}] - TRANSFORM VENDORS DATA INITIALIZED.')
 # TODO: Tabla Vendor
 vendor={    1:'Creative Mobile Technologies, LLC',
             2:'VeriFone Inc'}
@@ -99,12 +90,11 @@ df_vendor = pd.DataFrame([[key, vendor[key]] for key in vendor.keys()], columns=
 with open(table, "a") as f:
     f.write('\n' + pd.io.sql.get_schema(df_vendor, name='vendor') + ';' + '\n')
 df_vendor.to_csv('./out/vendor.csv', index=False)
+print(f'[{str(dt.now())[:19]}] - TRANSFORM VENDORS DATA SUCCESSFULY.')
 
 # 1= Tarifa estándar, **2**= jfk, **3**= nuevaark, **4**= nassau o westchester, **5**= tarifa negociada, **6**= paseo en grupo
 
-print('---------------------------------')
-print('|||   CONVIRTIENDO RATECODE   |||')
-print('---------------------------------')
+print(f'[{str(dt.now())[:19]}] - TRANSFORM RATECODE DATA INITIALIZED.')
 # TODO: Tabla Rate Code
 Ratecode={  1:'Tarifa estándar',
             2:'jfk',
@@ -119,12 +109,11 @@ df_Ratecode = pd.DataFrame([[key, Ratecode[key]] for key in Ratecode.keys()], co
 with open(table, "a") as f:
     f.write('\n' + pd.io.sql.get_schema(df_Ratecode, name='ratecode') + '\n' + ';')
 df_Ratecode.to_csv('./out/ratecode.csv', index=False)
+print(f'[{str(dt.now())[:19]}] - TRANSFORM RATECODE DATA SUCCESSFULY.')
 
 # **1= tarjeta de crédito, **2**= efectivo, **3**= sin cargo, **4**= disputa, **5**= desconocido, **6**= viaje anulado**
 
-print('---------------------------------')
-print('|||   CONVIRTIENDO PAYMENTS   |||')
-print('---------------------------------')
+print(f'[{str(dt.now())[:19]}] - TRANSFORM PAYMENT DATA INITIALIZED.')
 # TODO: Tabla Payment
 payment={   1:'tarjeta de crédito',
             2:'efectivo',
@@ -137,10 +126,9 @@ df_payment = pd.DataFrame([[key, payment[key]] for key in payment.keys()], colum
 with open(table, "a") as f:
     f.write('\n' + pd.io.sql.get_schema(df_payment, name='payment') + '\n' + ';')
 df_payment.to_csv('./out/payment.csv', index=False)
+print(f'[{str(dt.now())[:19]}] - TRANSFORM PAYMENT DATA SUCCESSFULY.')
 
-print('---------------------------------')
-print('|||   CONVIRTIENDO BOROUGH    |||')
-print('---------------------------------')
+print(f'[{str(dt.now())[:19]}] - TRANSFORM BOROUGH DATA INITIALIZED.')
 # TODO: Tabla Location
 df_copy.rename(columns={'index':'taxis_id'}, inplace=True)
 
@@ -156,7 +144,7 @@ Borough = pd.DataFrame(Borough_dic)
 with open(table, "a") as f:
     f.write('\n' + pd.io.sql.get_schema(Borough, name='borough') + ';' + '\n' )
 Borough.to_csv('./out/borough.csv', index=False)
-
+print(f'[{str(dt.now())[:19]}] - TRANSFORM BOROUGH DATA SUCCESSFULY.')
 
 def algo(params):
     return Borough.IdBorough[Borough.Borough== params].iloc[0]
@@ -165,17 +153,14 @@ df_Taxi_zone.Borough = df_Taxi_zone.Borough.apply(algo)
 df_Taxi_zone.rename(columns={'Borough':'IdBorough', 'LocationID': 'IdLocation'}, inplace=True)
 df_Taxi_zone.drop('service_zone',axis=1 ,inplace=True)
 
-print('---------------------------------')
-print('|||   CONVIRTIENDO LOCATION   |||')
-print('---------------------------------')
+print(f'[{str(dt.now())[:19]}] - TRANSFORM LOCATION DATA INITIALIZED.')
 Location = df_Taxi_zone.copy()
 with open(table, "a") as f:
     f.write('\n' + pd.io.sql.get_schema(Location, name='location') + ';' + '\n' )
 Location.to_csv('./out/location.csv', index=False)
+print(f'[{str(dt.now())[:19]}] - TRANSFORM LOCATION DATA SUCCESSFULY.')
 
-print('---------------------------------')
-print('|||   CONVIRTIENDO CALENDAR   |||')
-print('---------------------------------')
+print(f'[{str(dt.now())[:19]}] - TRANSFORM CALENDAR DATA INITIALIZED.')
 # TODO: Tabla Calendario
 def calendar_table(start='', end=''):
     df = pd.DataFrame({'Date':pd.date_range(start, end)})
@@ -190,6 +175,7 @@ calendar = calendar_table('2018-01-01', '2018-01-31')
 with open(table, "a") as f:
     f.write('\n' + pd.io.sql.get_schema(calendar, name='calendar') + '\n' + ';')
 calendar.to_csv('./out/calendar.csv', index=False)
+print(f'\n[{str(dt.now())[:19]}] - TRANSFORM CALENDAR DATA SUCCESSFULY.')
 
 '''
 calendar.rename(columns={'id':'IdCalendar'}, inplace=True)
