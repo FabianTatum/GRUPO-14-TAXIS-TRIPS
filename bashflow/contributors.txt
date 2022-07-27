@@ -1,0 +1,19 @@
+------------------------------------------------
+
+        PROCESS COMPLETED SUCCESSFULY
+
+to visualize: http://127.0.0.1:8080
+    user: admin@admin.com
+    password: root
+
+- CONTRIBUTORS:
+
+* Fabian Palacios
+* Martin Paz
+* Alejandro Engelstain
+* Alan Olvera
+* Facundo Opido
+
+          ...Thanks, happy analysis
+
+
