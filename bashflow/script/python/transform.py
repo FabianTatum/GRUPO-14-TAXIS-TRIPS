@@ -1,193 +1,168 @@
-#!/bin/bash/env python
-
 import pandas as pd
-import numpy as np
-#from simpledbf import Dbf5
 from datetime import datetime as dt
+import sample_data as sd
 
-print(f'[{str(dt.now())[:19]}] - WARNING: Parquet charge in memory initialized !!!')
-print(f'\n Please wait...\n')
-df = pd.read_parquet('./in/yellow_trips_2018-01.parquet')
-print(f'[{str(dt.now())[:19]}] - SUCCESS: Parquet charge in memory completed.\n')
+#funcion para calcular outliers
+def outliers_obt(data, columna,cuartial1,cuartil2,valoriqr=1.5):
+    ##calculamos los cuartiles 
+    Q1 = data[columna].quantile(float(cuartial1))
+    #print('Primer Cuartile', Q1)
+    Q3 = data[columna].quantile(float(cuartil2))
+    #print('Tercer Cuartile',Q3)
+    IQR = Q3 - Q1
+    #print('Rango intercuartile', IQR)
 
-print(f'[{str(dt.now())[:19]}] - Initialized charge of Incremental in 50000.')
+    ##calculamos los bigotes superior e inferior
+    BI = (Q1 - valoriqr * IQR)
+    #print('bigote Inferior \n', BI)
+    BS = (Q3 + valoriqr * IQR)
+    #print('bigote superior \n', BS)
 
-df_copy = df.sample(500000)
+    ##obtenemos una nueva tabla sin los outliers
+    ubi_sin_out = data[(data[columna] >= BI) & (data[columna] <= BS)]
+    return ubi_sin_out
 
-# creo una nueva columna del monto total restando las posibles columnas que no vamos a usar 
-df_copy['total_amount_1'] = df_copy.total_amount - df_copy.tolls_amount - df_copy.congestion_surcharge - df_copy.airport_fee
+def transform(fecha):
+    directorio_parquet = (f'./in/yellow_trips_{fecha}.parquet')
+    directorio_Location = ('./in/taxi_zone_lookup.csv')
+#   directorio_calendar=('./in/calendar.csv')
 
-df_copy.drop(['congestion_surcharge','airport_fee'], axis=1, inplace=True)
+    #crear dataframe
+    print(f'[{str(dt.now())[:19]}] - WARNING: Parquet charge in memory initialized !!!')
+    df_org = pd.read_parquet(directorio_parquet)
+    print(f'[{str(dt.now())[:19]}] - SUCCESS: Parquet charge in memory completed.\n')
+    df_Taxi_zone = pd.read_csv(directorio_Location)
+    #calendar = pd.read_csv(directorio_calendar, sep=';')
+    
+    print(f'[{str(dt.now())[:19]}] - SUCCESS: Parquet charge in memory completed.\n')
 
-print(f'[{str(dt.now())[:19]}] - TRANSFORM TRIPS DATA INITIZALIZED. \n')
-
-# creo nueva columna del tiempo de vieja desde que sube al taxis hasta que baja
-df_copy['Travel_time'] = df_copy.tpep_dropoff_datetime - df_copy.tpep_pickup_datetime
-
-df_copy.isna().sum()
-
-df_copy['LocationID']=df_copy['PULocationID']
-
-# columnas de dias y horas
-
-df_copy['day'] = df_copy['tpep_pickup_datetime'].map(lambda x: x.weekday()+1)
-df_copy['hour'] = df_copy['tpep_pickup_datetime'].map(lambda x: x.hour)
-conditionlist = [
-    (df_copy['hour']<6),
-    (df_copy['hour']<13),
-    (df_copy['hour']<19),
-    (df_copy['hour']<24)]
-turnos = ['late_night', 'morning', 'afternoon', 'night']
-df_copy['turno'] = np.select(conditionlist, turnos, default='Not Specified')
-
-
-# levanto la tabla de los borough
-df_Taxi_zone = pd.read_csv('./in/taxi_zone_lookup.csv')
-
-df_Taxi_zone['Zone'].fillna('Not specified',inplace=True)
-df_Taxi_zone['service_zone'].fillna('Not specified',inplace=True)
+#   df = sd.muestra(df_org)
+    df = df_org[0: 1000000]
+    del df_org
 
 
-# realizo el merge
-df_copy = df_copy.merge(df_Taxi_zone, how='left', on='LocationID')
+    ## NORMALIZACION
+    df=outliers_obt(df,'total_amount','0.25','0.75',valoriqr=4.5)
+    df=outliers_obt(df,'improvement_surcharge','0.25','0.75',valoriqr=4.5)
+    df=outliers_obt(df,'tip_amount','0.25','0.75',valoriqr=2)
+    df=outliers_obt(df,'mta_tax','0.25','0.75',valoriqr=1.5)
+    df=outliers_obt(df,'extra','0.25','0.75',valoriqr=1.5)
+    df=outliers_obt(df,'fare_amount','0.25','0.75',valoriqr=4.5)
+    df=outliers_obt(df,'trip_distance','0.25','0.75',valoriqr=3)
+    df=outliers_obt(df,'tpep_dropoff_datetime','0.25','0.75',valoriqr=1.5)
+    # copia del df
+    df_changes =df.copy()
+
+    # reemplazo valores nulos 
+    df_changes['congestion_surcharge'].fillna(0.0, inplace=True)
+    df_changes['airport_fee'].fillna(0.0, inplace=True)
+
+    # resto las columnas que no usaremos o dropeamos
+    df_changes['total_amount_1'] = df_changes.total_amount - df_changes.tolls_amount - df_changes.congestion_surcharge - df_changes.airport_fee
+    df_changes.drop(['congestion_surcharge','airport_fee'], axis=1, inplace=True)
+    df_changes['Travel_time'] = df_changes.tpep_dropoff_datetime - df_changes.tpep_pickup_datetime
+    # creo columna de location
+    df_changes['LocationID']=df_changes['PULocationID']
+
+    # DF Taxi_zone
+    # Reemplazo valores nulos
+    df_Taxi_zone['Zone'].fillna('Not specified',inplace=True)
+    df_Taxi_zone['service_zone'].fillna('Not specified',inplace=True)
+    # realizo merge para tener todo en un solo df
+    df_changes= df_changes.merge(df_Taxi_zone, how='left', on='LocationID')
+
+    # reseteo el index para renemobarlo y cambiarle el nombre a IdTaxis
+    df_changes.reset_index(inplace=True)
+    df_changes.rename(columns={'index':'IdTaxis_2018'}, inplace=True)
+    #normalizo todos los nombres de los ID 
+    df_changes.rename(columns={ 'VendorID':'IdVendor','RatecodeID':'IdRatecode','PULocationID':'IdPULocation','DOLocationID':'IdDOLocation',
+                                'payment_type':'IdPayment_type','LocationID':'IdLocation'},inplace=True)
+
+    mask = df_changes['IdRatecode'] < 10
+    df_changes = df_changes[mask] 
+
+    # Creo tabla de Hechos "taxi_trip_2018"
+    taxi_trip_2018 = df_changes[[  'IdTaxis_2018','IdVendor', 'tpep_pickup_datetime', 'tpep_dropoff_datetime','Travel_time','IdRatecode','IdPULocation'
+                                    ,'IdDOLocation','IdPayment_type','Borough','fare_amount','extra','mta_tax','tip_amount','improvement_surcharge','total_amount_1']]
+
+    ## CREACION TABLAS DE DIMENCION
+    vendor={    1:'Creative Mobile Technologies, LLC',
+                2:'VeriFone Inc'}
+
+    vendor = pd.DataFrame([[key, vendor[key]] for key in vendor.keys()], columns=['IdVendor', 'Name_vendor'])
 
 
-# no se si sirva pero ahi esta una tabla con las columnas que creo importante, quiza falten algunas mas para realizar los calculos
-df_costos = df_copy[['LocationID','Borough','Zone','trip_distance','total_amount_1','payment_type','Travel_time','hour','day','turno']]
-df_costos
+    Ratecode={  1:'Tarifa estándar',
+                2:'jfk',
+                3:'nuevaark',
+                4:'nassau o westchester',
+                5:'tarifa negociada',
+                6:'paseo en grupo'}
+
+    Ratecode = pd.DataFrame([[key, Ratecode[key]] for key in Ratecode.keys()], columns=['IdRatecode', 'Name_ratecode'])
 
 
-df_copy['IdTaxis'] = df_copy.index
+    payment={   1:'tarjeta de crédito',
+                2:'efectivo',
+                3:'sin cargo',
+                4:'disputa',
+                5:'desconocido',
+                6:'viaje anulado'}
 
-df_copy.rename(columns={ 'VendorID':'IdVendor','RatecodeID':'IdRatecode','PULocationID':'IdPULocation','DOLocationID':'IdDOLocation',
-                            'payment_type':'IdPayment_type','LocationID':'IdLocation'},inplace=True)
-
-
-taxi_trip_2018 = df_copy[['IdTaxis','IdVendor','tpep_pickup_datetime','tpep_dropoff_datetime','Travel_time','IdRatecode','IdPULocation'
-                           ,'IdDOLocation','IdPayment_type', 'fare_amount','extra','mta_tax','tip_amount','improvement_surcharge','total_amount_1']]
-
-to_str = lambda x: str(x)
-
-taxi_trip_2018['Travel_time'] = taxi_trip_2018['Travel_time'].apply(to_str)
-
-dx = taxi_trip_2018[taxi_trip_2018['IdRatecode'] > 10].index
-taxi_trip_2018.drop(index=dx, inplace=True)
-
-table = './script/sql/schema.sql'
-# TODO: Tabla de Viajes
-print('Convert to csv Taxi Trips')
-with open(table, "a") as f:
-    f.write('\n' + pd.io.sql.get_schema(taxi_trip_2018, name='taxi_trips') + ';' + '\n')
-taxi_trip_2018.to_csv('./out/taxi_trips.csv', index=False)
-print(f'[{str(dt.now())[:19]}] - TRANSFORM TRIPS DATA SUCCESSFULY.')
-
-print(f'[{str(dt.now())[:19]}] - TRANSFORM VENDORS DATA INITIALIZED.')
-# TODO: Tabla Vendor
-vendor={    1:'Creative Mobile Technologies, LLC',
-            2:'VeriFone Inc'}
-
-df_vendor = pd.DataFrame([[key, vendor[key]] for key in vendor.keys()], columns=['IdVendor', 'Name_vendor'])
-with open(table, "a") as f:
-    f.write('\n' + pd.io.sql.get_schema(df_vendor, name='vendor') + ';' + '\n')
-df_vendor.to_csv('./out/vendor.csv', index=False)
-print(f'[{str(dt.now())[:19]}] - TRANSFORM VENDORS DATA SUCCESSFULY.')
-
-# 1= Tarifa estándar, **2**= jfk, **3**= nuevaark, **4**= nassau o westchester, **5**= tarifa negociada, **6**= paseo en grupo
-
-print(f'[{str(dt.now())[:19]}] - TRANSFORM RATECODE DATA INITIALIZED.')
-# TODO: Tabla Rate Code
-Ratecode={  1:'Tarifa estándar',
-            2:'jfk',
-            3:'nuevaark',
-            4:'nassau o westchester',
-            5:'tarifa negociada',
-            6:'paseo en grupo'}
-
-df_Ratecode = pd.DataFrame([[key, Ratecode[key]] for key in Ratecode.keys()], columns=['IdRatecode', 'Name_ratecode'])
+    payment = pd.DataFrame([[key, payment[key]] for key in payment.keys()], columns=['IdPayment_type', 'Payment_type'])
 
 
-with open(table, "a") as f:
-    f.write('\n' + pd.io.sql.get_schema(df_Ratecode, name='ratecode') + '\n' + ';')
-df_Ratecode.to_csv('./out/ratecode.csv', index=False)
-print(f'[{str(dt.now())[:19]}] - TRANSFORM RATECODE DATA SUCCESSFULY.')
+    Borough_dic = [ {'IdBorough':1,'Borough':'EWR','Latitude':40.6895314,'Longitude':-74.17446239999998},
+                    {'IdBorough':2,'Borough':'Queens','Latitude':40.742054,'Longitude':-73.769417},
+                    {'IdBorough':3,'Borough':'Bronx','Latitude':40.837048,'Longitude':-73.865433},
+                    {'IdBorough':4,'Borough':'Manhattan','Latitude':40.776676,'Longitude':-73.971321},
+                    {'IdBorough':5,'Borough':'Staten Island','Latitude':40.579021,'Longitude':-74.151535},
+                    {'IdBorough':6,'Borough':'Brooklyn','Latitude':40.650002,'Longitude':-73.949997},
+                    {'IdBorough':7,'Borough':'Unknown','Latitude':0.0,'Longitude':0.0}]
 
-# **1= tarjeta de crédito, **2**= efectivo, **3**= sin cargo, **4**= disputa, **5**= desconocido, **6**= viaje anulado**
+    Borough = pd.DataFrame(Borough_dic)
+    # Funcion para relacionar los indices de una columna con otra
+    def algo(params):
+        try:
+            return Borough.IdBorough[Borough.Borough== params].iloc[0]
+        except:
+            return 7
 
-print(f'[{str(dt.now())[:19]}] - TRANSFORM PAYMENT DATA INITIALIZED.')
-# TODO: Tabla Payment
-payment={   1:'tarjeta de crédito',
-            2:'efectivo',
-            3:'sin cargo',
-            4:'disputa',
-            5:'desconocido',
-            6:'viaje anulado'}
+    # subescribo los valores del df "df_Taxi_zone" de la columna "borough" y le aplico un nuevo valores con la funcion creada arriba
+    df_Taxi_zone.Borough = df_Taxi_zone.Borough.apply(algo)
+    # renombro la columna 
+    df_Taxi_zone.rename(columns={'Borough':'IdBorough', 'LocationID': 'IdLocation'}, inplace=True)
+    # realizo un drop de la columna "service_zone"
+    df_Taxi_zone.drop('service_zone',axis=1 ,inplace=True)
+    # subescribo los valores del df "taxi_trip_2018" de la columna "borough" y le aplico un nuevo valores con la funcion creada arriba
+    taxi_trip_2018.Borough = taxi_trip_2018.Borough.apply(algo)
+    # Cambio el nombre de la columna "Borough" 
+    taxi_trip_2018.rename(columns={'Borough':'IdBorough'}, inplace=True)
+    ## tabla de dimencion "Location"
+    Location = df_Taxi_zone.copy()
 
-df_payment = pd.DataFrame([[key, payment[key]] for key in payment.keys()], columns=['IdPayment_type', 'Payment_type'])
-with open(table, "a") as f:
-    f.write('\n' + pd.io.sql.get_schema(df_payment, name='payment') + '\n' + ';')
-df_payment.to_csv('./out/payment.csv', index=False)
-print(f'[{str(dt.now())[:19]}] - TRANSFORM PAYMENT DATA SUCCESSFULY.')
+    to_str = lambda x: str(x)
+    taxi_trip_2018['Travel_time'] = taxi_trip_2018['Travel_time'].apply(to_str)
 
-print(f'[{str(dt.now())[:19]}] - TRANSFORM BOROUGH DATA INITIALIZED.')
-# TODO: Tabla Location
-df_copy.rename(columns={'index':'taxis_id'}, inplace=True)
+    #normalizo la columna "Date" del "calendario" con la forma "AAAA-MM-DD"
+    #calendar["Date"] = pd.to_datetime(calendar["date"])
+    # renombro columna id de "calendario"
+    #calendar.rename(columns={'id':'IdCalendar'}, inplace=True)
+    # organizo las columnas 
+    #calendar = calendar.reindex(columns=['IdCalendar','Date','year','week','day','hour'])
 
-Borough_dic = [ {'IdBorough':1,'Borough':'EWR','Latitude':40.6895314,'Longitude':-74.17446239999998},
-                {'IdBorough':2,'Borough':'Queens','Latitude':40.742054,'Longitude':-73.769417},
-                {'IdBorough':3,'Borough':'Bronx','Latitude':40.837048,'Longitude':-73.865433},
-                {'IdBorough':4,'Borough':'Manhattan','Latitude':40.776676,'Longitude':-73.971321},
-                {'IdBorough':5,'Borough':'Staten Island','Latitude':40.579021,'Longitude':-74.151535},
-                {'IdBorough':6,'Borough':'Brooklyn','Latitude':40.650002,'Longitude':-73.949997},
-                {'IdBorough':7,'Borough':'Unknown','Latitude':0.0,'Longitude':0.0}]
+    # TODO: Logs
+    print(f'[{str(dt.now())[:19]}] - TRANSFORM TRIPS DATA SUCCESSFULY.')
+    print(f'[{str(dt.now())[:19]}] - TRANSFORM VENDORS DATA SUCCESSFULY.')
+    print(f'[{str(dt.now())[:19]}] - TRANSFORM RATECODE DATA SUCCESSFULY.')
+    print(f'[{str(dt.now())[:19]}] - TRANSFORM PAYMENT DATA SUCCESSFULY.')
+    print(f'[{str(dt.now())[:19]}] - TRANSFORM BOROUGH DATA SUCCESSFULY.')
+    print(f'[{str(dt.now())[:19]}] - TRANSFORM LOCATION DATA SUCCESSFULY.')
+    #print(f'\n[{str(dt.now())[:19]}] - TRANSFORM CALENDAR DATA SUCCESSFULY.')
 
-Borough = pd.DataFrame(Borough_dic)
-with open(table, "a") as f:
-    f.write('\n' + pd.io.sql.get_schema(Borough, name='borough') + ';' + '\n' )
-Borough.to_csv('./out/borough.csv', index=False)
-print(f'[{str(dt.now())[:19]}] - TRANSFORM BOROUGH DATA SUCCESSFULY.')
 
-def algo(params):
-    return Borough.IdBorough[Borough.Borough== params].iloc[0]
 
-df_Taxi_zone.Borough = df_Taxi_zone.Borough.apply(algo)
-df_Taxi_zone.rename(columns={'Borough':'IdBorough', 'LocationID': 'IdLocation'}, inplace=True)
-df_Taxi_zone.drop('service_zone',axis=1 ,inplace=True)
+    # TODO: Agregar calendario cuando se pueda
+    lista_table=[Borough, Location,Ratecode,payment,vendor, taxi_trip_2018] 
 
-print(f'[{str(dt.now())[:19]}] - TRANSFORM LOCATION DATA INITIALIZED.')
-Location = df_Taxi_zone.copy()
-with open(table, "a") as f:
-    f.write('\n' + pd.io.sql.get_schema(Location, name='location') + ';' + '\n' )
-Location.to_csv('./out/location.csv', index=False)
-print(f'[{str(dt.now())[:19]}] - TRANSFORM LOCATION DATA SUCCESSFULY.')
-
-print(f'[{str(dt.now())[:19]}] - TRANSFORM CALENDAR DATA INITIALIZED.')
-# TODO: Tabla Calendario
-def calendar_table(start='', end=''):
-    df = pd.DataFrame({'Date':pd.date_range(start, end)})
-    df['Year'] = df.Date.dt.year
-    df['Month'] = df.Date.dt.month
-    df['Day'] = df.Date.dt.day
-    df['Week'] = df.Date.dt.isocalendar().week
-    df['Weekday'] = df.Date.dt.day_of_week + 1
-    return df
-
-calendar = calendar_table('2018-01-01', '2018-01-31')
-with open(table, "a") as f:
-    f.write('\n' + pd.io.sql.get_schema(calendar, name='calendar') + '\n' + ';')
-calendar.to_csv('./out/calendar.csv', index=False)
-print(f'\n[{str(dt.now())[:19]}] - TRANSFORM CALENDAR DATA SUCCESSFULY.')
-
-'''
-calendar.rename(columns={'id':'IdCalendar'}, inplace=True)
-
-type(calendar.IdCalendar[calendar.date == str('1/1/2018').split(' ')[0]].loc[0])
-
-taxi_trip_2018['IdCalendar']= 0
-
-taxi_trip_2018.IdCalendar = taxi_trip_2018.tpep_dropoff_datetime.apply(id_tabla)
-
-# subescribo los valores del df "taxi_trip_2018" de la columna "borough" y le aplico un nuevo valores con la funcion creada arriba
-taxi_trip_2018.Borough = taxi_trip_2018.Borough.apply(algo)
-# Cambio el nombre de la columna "Borough" 
-taxi_trip_2018.rename(columns={'Borough':'IdBorough'}, inplace=True)
-'''
+    return lista_table

@@ -15,7 +15,6 @@ FOREIGN KEY ("IdIcon")
 REFERENCES "icon"("IdIcon");
 
 -- Primary keys Trips
-ALTER TABLE "taxi_trips" ADD PRIMARY KEY ("IdTaxis");
 ALTER TABLE "vendor" ADD PRIMARY KEY ("IdVendor");
 ALTER TABLE "ratecode" ADD PRIMARY KEY ("IdRatecode");
 ALTER TABLE "payment" ADD PRIMARY KEY ("IdPayment_type");
@@ -51,6 +50,3 @@ ALTER TABLE "taxi_trips"
 ADD CONSTRAINT "taxitrips_IdPULocation_fk"
 FOREIGN KEY ("IdPULocation") 
 REFERENCES "location"("IdLocation");
-
-\d weather
-\d taxi_trips

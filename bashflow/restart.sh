@@ -8,13 +8,8 @@ sudo rm -r postgresql
 
 cd ..
 
-rm ./script/sql/schema.sql
+rm ./in/yellow_trips_*.parquet
 
-touch ./script/sql/schema.sql
-
-rm ./in/yellow_trips_2018-01.parquet
-
-rm ./out/calendar.csv
 rm ./out/borough.csv
 rm ./out/condition.csv
 rm ./out/icon.csv

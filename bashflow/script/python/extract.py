@@ -106,20 +106,13 @@ condition['IdCondition'] = condition.index
 # renombrar claves
 df.rename(columns={'conditions': 'IdCondition', 'icon': 'IdIcon'}, inplace=True)
 
-#Crear los esquemas de tablas
-table = './script/sql/schema.sql'
-
 # Crear todos los csv de weather, icon y condition.
-with open(table, 'a') as f:
-    f.write('\n' + pd.io.sql.get_schema(df, name='weather') + '\n' + ';')
 df.to_csv('./out/weather.csv', index=False)
 print(f'[{str(dt.now())[:19]}] - Extract data from weather successfuly.')
-with open(table, 'a') as f:
-    f.write('\n' + pd.io.sql.get_schema(icon, name='icon') + '\n' + ';')
+
 icon.to_csv('./out/icon.csv',  index=False)
 print(f'[{str(dt.now())[:19]}] - Extract data from icon successfuly.')
-with open(table, 'a') as f:
-    f.write('\n' + pd.io.sql.get_schema(condition, name='condition') + '\n' + ';')
+
 condition.to_csv('./out/condition.csv', index=False)
 print(f'[{str(dt.now())[:19]}] - Extract data from condition successfuly.')
 
