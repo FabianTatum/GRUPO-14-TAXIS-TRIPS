@@ -47,6 +47,19 @@ REFERENCES "borough"("idborough");
 
 -- Relaciones * trips -> PULocation -> location 
 ALTER TABLE "taxi_trips"
-ADD CONSTRAINT "taxitrips_IdPULocation_fk"
-FOREIGN KEY ("IdPULocation") 
+ADD CONSTRAINT "taxitrips_idpulocation_fk"
+FOREIGN KEY ("idpulocation") 
 REFERENCES "location"("idlocation");
+
+-- Relaciones * trips -> dolocation -> location 
+ALTER TABLE "taxi_trips"
+ADD CONSTRAINT "taxitrips_iddolocation_fk"
+FOREIGN KEY ("iddolocation") 
+REFERENCES "location"("idlocation");
+
+-- Relaciones * Trips -> Borough
+ALTER TABLE "taxi_trips"
+ADD CONSTRAINT "taxitrips_borough_fk"
+FOREIGN KEY ("idborough") 
+REFERENCES "borough"("idborough");
+
