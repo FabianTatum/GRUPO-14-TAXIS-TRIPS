@@ -18,11 +18,9 @@ Se busca evaluar el comportamiento de la demanda mediante el análisis de las ca
 
 La gráfica de la distribución de la cantidad de viajes respecto a los días de la semana nos dice que no hay gran variación entre ellos, y tal como se esperaba la demanda crece a medida que se acerca el fin de semana, siendo el domingo elde menor valor. A su vez, tambien se ve que el jueves es el tiene y siempre en un rango más acotado, el 50% de los jueves analizados tuvieron entre 38000 y 42800 viajes.
 
-<center> https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png </center>
-
 <div>
 <p style = 'text-align:center;'>
-<img src="https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png" alt="JuveYell" width="300px">
+<img src="https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png" alt="JuveYell" >
 </p>
 </div>
 
