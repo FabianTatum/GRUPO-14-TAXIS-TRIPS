@@ -20,7 +20,7 @@ La gráfica de la distribución de la cantidad de viajes respecto a los días de
 
 <center>
   
-![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png?raw=true)
+  ![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png?raw=true)
   
 </center>
 
@@ -29,7 +29,7 @@ Luego, durante el período de 10hs a 16hs se requiere un número ciertamente aco
   
 <center>
   
-![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/dist_viaje_hora.png?raw=true)
+  ![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/dist_viaje_hora.png?raw=true)
   
 </center>
 
