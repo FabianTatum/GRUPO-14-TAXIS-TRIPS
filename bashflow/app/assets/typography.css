@@ -115,6 +115,13 @@ div {
     padding-left: 0;
 }
 
+.footer {
+    padding: 0.5rem;
+    text-align: center;
+    color: var(--white-color);
+    background-color: var(--third-color);
+}
+
 .header {
     position: fixed;
     left: 0;
@@ -189,6 +196,7 @@ div {
         height: calc(var(--header-height) - 0.5rem);
     }        
 }
+
 
 @media screen and (min-width: 728px){
     .full-lg-screen {
