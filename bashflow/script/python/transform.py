@@ -42,6 +42,8 @@ def transform(fecha):
     #df = df_org.sample(1000000)
     del df_org
 
+    log('Transform data initialized.\n')
+    log('Please wait...\n')
 
     ## NORMALIZACION
     df=outliers_obt(df,'total_amount','0.25','0.75',valoriqr=4.5)

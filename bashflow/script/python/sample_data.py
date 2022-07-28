@@ -2,11 +2,12 @@ import pandas as pd
 import re
 import numpy as np
 import datetime
+from logs import log
 
 def muestra(df, date):
 
 # indice en la muestra
-
+    log('Iniciando obtención de muestras...')
 
     # crear dataframe vacio para el sample
     muestra = pd.DataFrame()
@@ -74,5 +75,8 @@ def muestra(df, date):
             del mu
             del aux
         #print('Dia '+str(d)+' finalizado')
+
+    log('Muestra obtenida del 12.5% de los datos, completada.')    
+
     return muestra
     
