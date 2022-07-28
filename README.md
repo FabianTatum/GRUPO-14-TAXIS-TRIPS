@@ -18,20 +18,12 @@ Se busca evaluar el comportamiento de la demanda mediante el análisis de las ca
 
 La gráfica de la distribución de la cantidad de viajes respecto a los días de la semana nos dice que no hay gran variación entre ellos, y tal como se esperaba la demanda crece a medida que se acerca el fin de semana, siendo el domingo elde menor valor. A su vez, tambien se ve que el jueves es el tiene y siempre en un rango más acotado, el 50% de los jueves analizados tuvieron entre 38000 y 42800 viajes.
 
-<center>
-  
-  ![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png?raw=true)
-  
-</center>
+<center>![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png?raw=true)</center>
 
 En la siguiente gráfica se observa, como se espera, una tendencia creciente en cuanto al numero de viajes conforme se aproximan los horarios de entrada y salida laboral , aunque de forma muy variable, es decir, a dichas horas se pueden efectuar muchos o pocos viajes.
 Luego, durante el período de 10hs a 16hs se requiere un número ciertamente acotado entre 10.000 y 17.000 viajes. Al aproximarse el horario de fin de jornada (17hs ~ 19hs) se observan los valores más elevados, llegando a efectuarse hasta 21.000 viajes por hora. Luego, conforme continúa el día la cantidad de viajes efectuados decrece hasta el próximo día a las 06hs.
   
-<center>
-  
-  ![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/dist_viaje_hora.png?raw=true)
-  
-</center>
+<center>![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/dist_viaje_hora.png?raw=true)</center>
 
 Como se observa en el gráfico, más del 90% de los viajes de taxi se realizan en la zona de Manhattan. Distribuyendose el resto de los viajes entre Brooklyn y Queens. Para el espacio muestreado, no se observan practicamente viajes en el borough de  Staten Island.
 
