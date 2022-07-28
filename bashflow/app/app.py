@@ -9,7 +9,7 @@ import figures
 #----------GRAFICAS -----------#
 ################################
 boroughs_map_intro_fig = figures.borough_map(intro='borough')
-boroughs_map_fig = figures.borough_map()
+boroughs_map_fig = figures.borough_map_pop()
 median_trips_day_fig = figures.median_trips_day()
 distribution_trips_day_fig = figures.distribution_trips_day()
 distribution_trips_hour_fig = figures.distribution_trips_hour()

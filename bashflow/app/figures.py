@@ -1,5 +1,6 @@
 #!/home/fabiantatum/miniconda3/envs/dash-plotly python3
 
+from urllib.request import urlopen
 import db
 import json
 import pandas as pd
@@ -9,6 +10,7 @@ import plotly.graph_objects as go
 from logs import log
 from pandarallel import pandarallel
 from datetime import datetime as dt
+from numpy import log as ln
 
 def distribution_trips_hour():
     df = db.conn(
@@ -238,4 +240,138 @@ def borough_map(intro='fare_amount'):
     fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
     log('Grafico construido.')
     return fig
+
+def borough_map_pop():
+
+    taxi_trip_2018 = db.conn(
+        '''
+            select * from taxi_trips;
+        ''' 
+        
+    )
+
+    Borough = db.conn(
+        '''
+            select * from borough;
+        ''' 
+        
+    )
+
+    Location = db.conn(
+        '''
+            select * from location;
+        ''' 
+        
+    )
+
+    with urlopen('https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json') as response:
+        counties = json.load(response)
+
+    d = ['36005', '36047', '36061', '36081', '36085']
+    name = ['Bronx', 'Brooklyn', 'Manhattan', 'Queens',  'Staten Island']
+
+    c = pd.DataFrame()
+    c['fips'] = d
+    c['borough'] = name
+    c['unemp'] = [1,3,6,8,11]
+
+    directorio_Location = '../in/taxi_zone_lookup.csv'
+
+    df_Taxi_zone = pd.read_csv(directorio_Location)
+
+    def algo(params):
+        if params == 'EWR':
+            return 1
+        if params == 'Queens':
+            return 2
+        if params == 'Bronx':
+            return 3
+        if params == 'Manhattan':
+            return 4
+        if params == 'Staten Island':
+            return 5
+        if params == 'Brooklyn':
+            return 6
+        else:
+            return params
+    print('3/4')
+
+    pandarallel.initialize()
+    # subescribo los valores del df "df_Taxi_zone" de la columna "borough" y le aplico un nuevo valores con la funcion creada arriba
+    df_Taxi_zone.Borough = df_Taxi_zone.Borough.parallel_apply(algo)
+    # renombro la columna 
+    df_Taxi_zone.rename(columns={'Borough':'IdBorough'}, inplace=True)
+    # realizo un drop de la columna "service_zone"
+    #df_Taxi_zone.drop('service_zone',axis=1 ,inplace=True)
+    # tabla de dimencion "Location"
+    Location = df_Taxi_zone.copy()
+    #normalizo la columna "Date" del "calendario" con la forma "AAAA-MM-DD"
+    #calendar["Date"] = pd.to_datetime(calendar["date"])
+    # renombro columna id de "calendario"
+    #calendar.rename(columns={'id':'IdCalendar'}, inplace=True)
+    # organizo las columnas 
+    #calendar = calendar.reindex(columns=['IdCalendar','Date','year','week','day','hour'])
+    # Funcion para relacionar los indices de una columna con otra para la tabla taxi_trip_2018
+    #def algo1(params):
+    #    try:
+    #        return Borough.IdBorough[Borough.Borough== params].iloc[0]
+    #    except:
+    #        return 7
+    # subescribo los valores del df "taxi_trip_2018" de la columna "borough" y le aplico un nuevo valores con la funcion creada arriba
+    #taxi_trip_2018.IdBorough = taxi_trip_2018.idBorough.parallel_apply(algo)     #1)----------------------------------------------
+    # Cambio el nombre de la columna "Borough" 
+    taxi_trip_2018.rename(columns={'Borough':'IdBorough'}, inplace=True)
+
+    #lista_table=[Borough, Location,Ratecode,payment,vendor, calendar, taxi_trip_2018] 
+    lista_table = []
+    lista_table.append(taxi_trip_2018)
+    #print(type(lista_table))
+    #print(type(lista_table[0]))
+    #print(lista_table[0].head())
+    print('4/4')
+
+    Borough.rename(columns={'idborough':'IdBorough'}, inplace=True)
+
+    df_Taxi_zone = df_Taxi_zone.merge(Borough, how= 'left', on='IdBorough')
+    df_Taxi_zone.drop(columns=['Zone','latitude', 'longitude'], inplace=True)
+
+
+    df_Taxi_zone.loc[df_Taxi_zone[df_Taxi_zone.IdBorough == 'Unknown'].index,'borough'] = 'Unknown'
+
+    # marge DropOff location
+    taxi_trip_2018 = taxi_trip_2018.merge(df_Taxi_zone, how = 'left', right_on = 'LocationID', left_on = 'idpulocation')
+    #taxi_trip_2018.drop(columns= ['IdPULocation', 'LocationID'], inplace=True)
+    taxi_trip_2018.rename(columns={'Borough' : 'boroughPU'}, inplace=True)
+
+    # marge entre columnas bla bla bla
+    taxi_trip_2018 = taxi_trip_2018.merge(df_Taxi_zone, how = 'left', right_on = 'LocationID', left_on = 'iddolocation')
+    #taxi_trip_2018.drop(columns= ['IdDOLocation', 'LocationID'], inplace=True)
+    taxi_trip_2018.rename(columns={'Borough':'boroughDO'}, inplace=True)
+
+    z = (taxi_trip_2018.groupby(['borough_x', 'borough_y']).size()).unstack()
+
+    z.sum()
+
+    z.fillna(0, inplace=True)
+    z.drop(columns=['EWR'], inplace=True)
+    z.drop(['EWR'], axis=0, inplace=True)
+    z.drop(columns=['Unknown'], axis=1 , inplace = True)
+    z.drop(['Unknown'], axis=0, inplace=True)
+
+    c.unemp = z.sum().values
+    c.loc[:,'unemp'] = ln(c.unemp)
+
+    fig = px.choropleth_mapbox(c, geojson=counties, locations='fips', color='unemp',
+                            color_continuous_scale=px.colors.sequential.YlOrBr,
+                            range_color=(0, c.unemp.max()),
+                            mapbox_style="carto-positron",
+                            zoom=9,
+                            center= {"lat": 40.7080747, "lon": -73.9810613},
+                            opacity=0.5,
+                            labels={'unemp':'trips scale'}
+                            )
+    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+
+    return fig
+
 
