@@ -1,5 +1,7 @@
 from dash import Dash, html, dcc, Input, Output
 import figures
+import linear_regression as lr_pred
+from logs import log
 
 ################################
 #------------ DATOS -----------#
@@ -345,7 +347,13 @@ app.layout = html.Div(children=[
 
                 html.P(children=[
                     '''
-                    Descripcion de la regresion lineal y lo que se obtiene
+                    En esta sección creamos un algoritmo de regresión lineal, buscando el coeficiente de 
+                    correlación entre las variables monto y distancia. El objetivo es, dada una distancia 
+                    de viaje, predecir el monto aproximado de viaje, de modo que el cliente sepa de ante mano cuánto le puede costar. 
+                    Para este modelo se utilizó la librería Scikit-learn, una librería de aprendizaje automático 
+                    de código abierto para python. Se tomaron como datos los pertenecientes a Enero-2018 y se 
+                    realizó una partición de los datos para train/test en una proporción de 0.75/0.25 con una 
+                    limpieza previa de valores atípicos para mejorar la eficacia del modelo. 
                     '''
                 ], className='paragraph-text'
                 )
@@ -366,7 +374,7 @@ app.layout = html.Div(children=[
             html.Article(children=[
 
                 html.H2(children=[
-                    "Ingresa el valor para tu predicción:",
+                    "Ingresa la distancia en millas para conocer el monto del viaje:",
                 ], 
                 style={
                     'margin': '2rem auto',
@@ -381,7 +389,8 @@ app.layout = html.Div(children=[
 
             html.Article(children=[
 
-                dcc.Input(id='linear-regression-input', value='', type='float'),
+                dcc.Input(id='linear-regression-input', value='0', type='number',
+                className='center-block'),
 
                 html.H2(id='linear-regression-output',
                 style={
@@ -423,7 +432,22 @@ app.layout = html.Div(children=[
     Input(component_id='linear-regression-input', component_property='value')
 )
 def update_output_div(input_value):
-    return f'El valor del viaje es ${input_value}'
+    if input_value == '' or input_value == None:
+        input_value = '0'
+
+    log(f'Input type initial: {type(input_value)}')
+    log(f'Input value initial: {input_value}')
+        
+    value = float(input_value)
+    
+    log(f'Input type initial: {type(value)}')
+    log(f'Input value initial: {value}')
+
+    valor_esperado = lr_pred.linear_regression_pred(value)
+
+    log(f'LR return: {input_value}')
+
+    return f'El valor del viaje es ${valor_esperado}'
 
 ################################
 #--------BODY DE LA APP--------#

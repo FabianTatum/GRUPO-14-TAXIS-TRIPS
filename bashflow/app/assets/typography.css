@@ -15,7 +15,7 @@
     --link-color: #509ee3;
     --title-color: #333;
     --text-color: #222;
-    --white-alpha-color: rgba(255, 255, 255, 0.67);
+    --white-alpha-color: rgba(255, 255, 255, 0.875);
     --black-alpha-color:rgba(0, 0, 0, 0.5);
     --font: "Raleway", sans-serif;
     --max-width: 1200px;
@@ -113,6 +113,13 @@ div {
     border: 0;
     border-bottom: thin solid var(--gray-dark-color);
     padding-left: 0;
+}
+
+.center-block {
+    margin: auto;
+    display: block;
+    padding: 0.5rem 1rem;
+    margin: 2rem auto;
 }
 
 .footer {
