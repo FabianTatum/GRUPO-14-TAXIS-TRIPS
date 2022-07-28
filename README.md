@@ -18,20 +18,16 @@ Se busca evaluar el comportamiento de la demanda mediante el análisis de las ca
 
 La gráfica de la distribución de la cantidad de viajes respecto a los días de la semana nos dice que no hay gran variación entre ellos, y tal como se esperaba la demanda crece a medida que se acerca el fin de semana, siendo el domingo elde menor valor. A su vez, tambien se ve que el jueves es el tiene y siempre en un rango más acotado, el 50% de los jueves analizados tuvieron entre 38000 y 42800 viajes.
 
-<center>
-  ![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png?raw=true)
-</center>
+<center>https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png?raw=true</center>
 
 En la siguiente gráfica se observa, como se espera, una tendencia creciente en cuanto al numero de viajes conforme se aproximan los horarios de entrada y salida laboral , aunque de forma muy variable, es decir, a dichas horas se pueden efectuar muchos o pocos viajes.
 Luego, durante el período de 10hs a 16hs se requiere un número ciertamente acotado entre 10.000 y 17.000 viajes. Al aproximarse el horario de fin de jornada (17hs ~ 19hs) se observan los valores más elevados, llegando a efectuarse hasta 21.000 viajes por hora. Luego, conforme continúa el día la cantidad de viajes efectuados decrece hasta el próximo día a las 06hs.
   
-<center> 
-![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/dist_viaje_hora.png?raw=true) 
-</center>
+<center>https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/dist_viaje_hora.png?raw=true</center>
 
 Como se observa en el gráfico, más del 90% de los viajes de taxi se realizan en la zona de Manhattan. Distribuyendose el resto de los viajes entre Brooklyn y Queens. Para el espacio muestreado, no se observan practicamente viajes en el borough de  Staten Island.
 
-![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/map_popu_borough.png?raw=true)
+<center>https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/map_popu_borough.png?raw=true</center>
 
 ## Regresión lineal 
 
@@ -39,7 +35,7 @@ En esta sección creamos un algoritmo de regresión lineal, buscando el coeficie
 
 Para este modelo se utilizó la librería Scikit-learn, una librería de aprendizaje automático de código abierto para python. Se tomaron como datos los pertenecientes a Enero-2018 y se realizó una partición de los datos para train/test en una proporción de 0.75/0.25 con una limpieza previa de valores atípicos para mejorar la eficacia del modelo. 
 
-![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/regresion_dist_monto_total.png?raw=true)
+<center>https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/regresion_dist_monto_total.png?raw=true</center>
 
 Como se puede ver, la regresión retorna una recta de valor $ y = 3.5548\cdot x + 5.4629$
 
@@ -54,12 +50,12 @@ Se utilizo Meta Prophet para llevar a cabo la predicción, una biblioteca de có
 El modelo TSF de Prophet segrega la serie de tiempo predicha en 2 componentes. Un primer componente de tendencia general donde observamos una directriz bajista que ronda el nivel de 32.000 viajes diarios y un segundo componente de estacionalidad semanal, el cual indica que la demanda de taxis crece a medida que se acerca el fin de semana, siendo el domingo el día con menor demanda. 
 
 
-![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/season.jpg?raw=true)
+<center>https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/season.jpg?raw=true</center>
 
 Al combinar el componente de tendencia y el estacional, el resultado es una predicción de la demanda futura de taxis para un mes el próximo a la fecha de análisis. El pronóstico generado mediante Prophet es una onda de tipo sinusoidal que oscila entre los valores 27.800 y 35.000 indicando que la demanda para el mes de febrero se ubicará entre tales valores. 
 
-![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/TSF%20final.PNG?raw=true)
+<center>https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/TSF%20final.PNG?raw=true</center>
 
 Podemos medir la eficacia del modelo a través del MAPE. El Error Porcentual Absoluto Medio (MAPE o Mean Absolute Percentage Error) es un indicador del desempeño del Pronóstico de Demanda que mide el tamaño del error (absoluto) en términos porcentuales. El MAPE promedio del modelo confeccionado es del 11.17% lo cual indica que la diferencia promedio entre el valor pronosticado por el modelo y el valor real es del 11.17%. Un MAPE entre 10 % y 25 % indica una precisión aceptable para un modelo de demanda. 
 
-![alt text](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/MAPE.jpg?raw=true)
+<center>https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/MAPE.jpg?raw=true</center>
