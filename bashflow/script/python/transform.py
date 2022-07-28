@@ -1,6 +1,8 @@
 import pandas as pd
 from datetime import datetime as dt
 import sample_data as sd
+from pandarallel import pandarallel
+from logs import log
 
 #funcion para calcular outliers
 def outliers_obt(data, columna,cuartial1,cuartil2,valoriqr=1.5):
@@ -25,21 +27,23 @@ def outliers_obt(data, columna,cuartial1,cuartil2,valoriqr=1.5):
 def transform(fecha):
     directorio_parquet = (f'./in/yellow_trips_{fecha}.parquet')
     directorio_Location = ('./in/taxi_zone_lookup.csv')
-#   directorio_calendar=('./in/calendar.csv')
+    #directorio_calendar=('./in/calendar.csv')
 
     #crear dataframe
-    print(f'[{str(dt.now())[:19]}] - WARNING: Parquet charge in memory initialized !!!')
+    log('WARNING: Parquet charge in memory initialized !!!')
     df_org = pd.read_parquet(directorio_parquet)
-    print(f'[{str(dt.now())[:19]}] - SUCCESS: Parquet charge in memory completed.\n')
+    log('SUCCESS: Parquet charge in memory completed.\n')
     df_Taxi_zone = pd.read_csv(directorio_Location)
     #calendar = pd.read_csv(directorio_calendar, sep=';')
     
-    print(f'[{str(dt.now())[:19]}] - SUCCESS: Parquet charge in memory completed.\n')
+    log('SUCCESS: Parquet charge in memory completed.\n')
 
-#   df = sd.muestra(df_org)
-    df = df_org[0: 1000000]
+    df = sd.muestra(df_org, fecha)
+    #df = df_org.sample(1000000)
     del df_org
 
+    log('Transform data initialized.\n')
+    log('Please wait...\n')
 
     ## NORMALIZACION
     df=outliers_obt(df,'total_amount','0.25','0.75',valoriqr=4.5)
@@ -82,8 +86,8 @@ def transform(fecha):
     df_changes = df_changes[mask] 
 
     # Creo tabla de Hechos "taxi_trip_2018"
-    taxi_trip_2018 = df_changes[[  'IdTaxis_2018','IdVendor', 'tpep_pickup_datetime', 'tpep_dropoff_datetime','Travel_time','IdRatecode','IdPULocation'
-                                    ,'IdDOLocation','IdPayment_type','Borough','fare_amount','extra','mta_tax','tip_amount','improvement_surcharge','total_amount_1']]
+    taxi_trip_2018 = df_changes[[  'IdTaxis_2018','IdVendor', 'tpep_pickup_datetime', 'tpep_dropoff_datetime','trip_distance','Travel_time','IdRatecode','IdPULocation'
+                                    ,'IdDOLocation','IdPayment_type','Borough','IdLocation','fare_amount','extra','mta_tax','tip_amount','improvement_surcharge','total_amount_1']]
 
     ## CREACION TABLAS DE DIMENCION
     vendor={    1:'Creative Mobile Technologies, LLC',
@@ -128,14 +132,32 @@ def transform(fecha):
         except:
             return 7
 
+    #def algo(params):
+    #    if params == 'EWR':
+    #        return 1
+    #    if params == 'Queens':
+    #        return 2
+    #    if params == 'Bronx':
+    #        return 3
+    #    if params == 'Manhattan':
+    #        return 4
+    #    if params == 'Staten Island':
+    #        return 5
+    #    if params == 'Brooklyn':
+    #        return 6
+    #    else:
+    #        return params
+
     # subescribo los valores del df "df_Taxi_zone" de la columna "borough" y le aplico un nuevo valores con la funcion creada arriba
-    df_Taxi_zone.Borough = df_Taxi_zone.Borough.apply(algo)
+    pandarallel.initialize()
+    df_Taxi_zone.Borough = df_Taxi_zone.Borough.parallel_apply(algo)
+    #df_Taxi_zone.Borough = df_Taxi_zone.Borough.apply(algo)
     # renombro la columna 
     df_Taxi_zone.rename(columns={'Borough':'IdBorough', 'LocationID': 'IdLocation'}, inplace=True)
     # realizo un drop de la columna "service_zone"
     df_Taxi_zone.drop('service_zone',axis=1 ,inplace=True)
     # subescribo los valores del df "taxi_trip_2018" de la columna "borough" y le aplico un nuevo valores con la funcion creada arriba
-    taxi_trip_2018.Borough = taxi_trip_2018.Borough.apply(algo)
+    taxi_trip_2018.Borough = taxi_trip_2018.Borough.parallel_apply(algo)
     # Cambio el nombre de la columna "Borough" 
     taxi_trip_2018.rename(columns={'Borough':'IdBorough'}, inplace=True)
     ## tabla de dimencion "Location"
@@ -152,12 +174,12 @@ def transform(fecha):
     #calendar = calendar.reindex(columns=['IdCalendar','Date','year','week','day','hour'])
 
     # TODO: Logs
-    print(f'[{str(dt.now())[:19]}] - TRANSFORM TRIPS DATA SUCCESSFULY.')
-    print(f'[{str(dt.now())[:19]}] - TRANSFORM VENDORS DATA SUCCESSFULY.')
-    print(f'[{str(dt.now())[:19]}] - TRANSFORM RATECODE DATA SUCCESSFULY.')
-    print(f'[{str(dt.now())[:19]}] - TRANSFORM PAYMENT DATA SUCCESSFULY.')
-    print(f'[{str(dt.now())[:19]}] - TRANSFORM BOROUGH DATA SUCCESSFULY.')
-    print(f'[{str(dt.now())[:19]}] - TRANSFORM LOCATION DATA SUCCESSFULY.')
+    log('TRANSFORM TRIPS DATA SUCCESSFULY.')
+    log('TRANSFORM VENDORS DATA SUCCESSFULY.')
+    log('TRANSFORM RATECODE DATA SUCCESSFULY.')
+    log('TRANSFORM PAYMENT DATA SUCCESSFULY.')
+    log('TRANSFORM BOROUGH DATA SUCCESSFULY.')
+    log('TRANSFORM LOCATION DATA SUCCESSFULY.')
     #print(f'\n[{str(dt.now())[:19]}] - TRANSFORM CALENDAR DATA SUCCESSFULY.')
 
 

@@ -1,52 +1,65 @@
 -- Primary keys weather relations
-ALTER TABLE "icon" ADD PRIMARY KEY ("IdIcon");
-ALTER TABLE "condition" ADD PRIMARY KEY ("IdCondition");
+ALTER TABLE "icon" ADD PRIMARY KEY ("idicon");
+ALTER TABLE "condition" ADD PRIMARY KEY ("idcondition");
 
 -- Relaciones * weather -> condition
 ALTER TABLE "weather"
 ADD CONSTRAINT "weather_condition_fk"
-FOREIGN KEY ("IdCondition") 
-REFERENCES "condition"("IdCondition");
+FOREIGN KEY ("idcondition") 
+REFERENCES "condition"("idcondition");
 
 -- Relaciones * weather -> icon
 ALTER TABLE "weather"
 ADD CONSTRAINT "weather_icon_fk"
-FOREIGN KEY ("IdIcon") 
-REFERENCES "icon"("IdIcon");
+FOREIGN KEY ("idicon") 
+REFERENCES "icon"("idicon");
 
 -- Primary keys Trips
-ALTER TABLE "vendor" ADD PRIMARY KEY ("IdVendor");
-ALTER TABLE "ratecode" ADD PRIMARY KEY ("IdRatecode");
-ALTER TABLE "payment" ADD PRIMARY KEY ("IdPayment_type");
-ALTER TABLE "location" ADD PRIMARY KEY ("IdLocation");
-ALTER TABLE "borough" ADD PRIMARY KEY ("IdBorough");
+ALTER TABLE "vendor" ADD PRIMARY KEY ("idvendor");
+ALTER TABLE "ratecode" ADD PRIMARY KEY ("idratecode");
+ALTER TABLE "payment" ADD PRIMARY KEY ("idpayment_type");
+ALTER TABLE "location" ADD PRIMARY KEY ("idlocation");
+ALTER TABLE "borough" ADD PRIMARY KEY ("idborough");
 
 -- Relaciones * trips -> vendor
 ALTER TABLE "taxi_trips"
 ADD CONSTRAINT "taxitrips_vendor_fk"
-FOREIGN KEY ("IdVendor") 
-REFERENCES "vendor"("IdVendor");
+FOREIGN KEY ("idvendor") 
+REFERENCES "vendor"("idvendor");
 
 -- Relaciones * trips -> ratecode
 ALTER TABLE "taxi_trips"
 ADD CONSTRAINT "taxitrips_ratecode_fk"
-FOREIGN KEY ("IdRatecode") 
-REFERENCES "ratecode"("IdRatecode");
+FOREIGN KEY ("idratecode") 
+REFERENCES "ratecode"("idratecode");
 
 -- Relaciones * trips -> payment
 ALTER TABLE "taxi_trips"
 ADD CONSTRAINT "taxitrips_payment_fk"
-FOREIGN KEY ("IdPayment_type") 
-REFERENCES "payment"("IdPayment_type");
+FOREIGN KEY ("idpayment_type") 
+REFERENCES "payment"("idpayment_type");
 
 -- Relaciones * Location -> Borough
 ALTER TABLE "location"
 ADD CONSTRAINT "location_borough_fk"
-FOREIGN KEY ("IdBorough") 
-REFERENCES "borough"("IdBorough");
+FOREIGN KEY ("idborough") 
+REFERENCES "borough"("idborough");
 
 -- Relaciones * trips -> PULocation -> location 
 ALTER TABLE "taxi_trips"
-ADD CONSTRAINT "taxitrips_IdPULocation_fk"
-FOREIGN KEY ("IdPULocation") 
-REFERENCES "location"("IdLocation");
+ADD CONSTRAINT "taxitrips_idpulocation_fk"
+FOREIGN KEY ("idpulocation") 
+REFERENCES "location"("idlocation");
+
+-- Relaciones * trips -> dolocation -> location 
+ALTER TABLE "taxi_trips"
+ADD CONSTRAINT "taxitrips_iddolocation_fk"
+FOREIGN KEY ("iddolocation") 
+REFERENCES "location"("idlocation");
+
+-- Relaciones * Trips -> Borough
+ALTER TABLE "taxi_trips"
+ADD CONSTRAINT "taxitrips_borough_fk"
+FOREIGN KEY ("idborough") 
+REFERENCES "borough"("idborough");
+

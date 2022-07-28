@@ -1,65 +1,67 @@
 
 CREATE TABLE "weather" (
-"datetime" TIMESTAMP,
+  "datetime" TIMESTAMP,
   "temp" TEXT,
   "feelslike" TEXT,
   "humidity" TEXT,
   "precip" TEXT,
   "snow" TEXT,
   "windspeed" TEXT,
-  "IdCondition" INTEGER,
-  "IdIcon" INTEGER
+  "idcondition" INTEGER,
+  "idicon" INTEGER
 )
 ;
 CREATE TABLE "icon" (
-"state" TEXT,
-  "IdIcon" INTEGER
+  "state" TEXT,
+  "idicon" INTEGER
 )
 ;
 CREATE TABLE "condition" (
 "condition" TEXT,
-  "IdCondition" INTEGER
+  "idcondition" INTEGER
 )
 ;
 CREATE TABLE "borough" (
-"IdBorough" INTEGER,
-  "Borough" TEXT,
-  "Latitude" REAL,
-  "Longitude" REAL
+  "idborough" INTEGER,
+  "borough" TEXT,
+  "latitude" REAL,
+  "longitude" REAL
 );
 
 CREATE TABLE "location" (
-"IdLocation" INTEGER,
-  "IdBorough" INTEGER,
+  "idlocation" INTEGER,
+  "idborough" INTEGER,
   "Zone" TEXT
 );
 
 CREATE TABLE "ratecode" (
-"IdRatecode" INTEGER,
-  "Name_ratecode" TEXT
+"idratecode" INTEGER,
+  "name_ratecode" TEXT
 );
 
 CREATE TABLE "payment" (
-"IdPayment_type" INTEGER,
-  "Payment_type" TEXT
+  "idpayment_type" INTEGER,
+  "payment_type" TEXT
 );
 
 CREATE TABLE "vendor" (
-"IdVendor" INTEGER,
-  "Name_vendor" TEXT
+  "idvendor" INTEGER,
+  "name_vendor" TEXT
 );
 
 CREATE TABLE "taxi_trips" (
-  "IdTaxis_2018" INTEGER,
-  "IdVendor" INTEGER,
+  "idtaxis_2018" INTEGER,
+  "idvendor" INTEGER,
   "tpep_pickup_datetime" TIMESTAMP,
   "tpep_dropoff_datetime" TIMESTAMP,
-  "Travel_time" TEXT,
-  "IdRatecode" INTEGER,
-  "IdPULocation" INTEGER,
-  "IdDOLocation" INTEGER,
-  "IdPayment_type" INTEGER,
-  "IdBorough" INTEGER,
+  "trip_distance" REAL,
+  "travel_time" TEXT,
+  "idratecode" INTEGER,
+  "idpulocation" INTEGER,
+  "iddolocation" INTEGER,
+  "idpayment_type" INTEGER,
+  "idborough" INTEGER,
+  "idlocation" INTEGER,
   "fare_amount" REAL,
   "extra" REAL,
   "mta_tax" REAL,

@@ -7,10 +7,10 @@ import csv
 import codecs
 import pandas as pd
 from datetime import datetime as dt
+from logs import log
 
 
-
-print(f'[{str(dt.now())[:19]}] - Search data from source...')
+log('Search data from source...')
 initial_date = '2018-01-01'
 final_date = '2018-01-01'
 url = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/New%20York/" + initial_date + "/" + final_date + "?unitGroup=metric&include=hours&key=FWHEEXHLDYZDXTKVGHP2SSCWL&contentType=csv"
@@ -108,12 +108,12 @@ df.rename(columns={'conditions': 'IdCondition', 'icon': 'IdIcon'}, inplace=True)
 
 # Crear todos los csv de weather, icon y condition.
 df.to_csv('./out/weather.csv', index=False)
-print(f'[{str(dt.now())[:19]}] - Extract data from weather successfuly.')
+log('Extract data from weather successfuly.')
 
 icon.to_csv('./out/icon.csv',  index=False)
-print(f'[{str(dt.now())[:19]}] - Extract data from icon successfuly.')
+log('Extract data from icon successfuly.')
 
 condition.to_csv('./out/condition.csv', index=False)
-print(f'[{str(dt.now())[:19]}] - Extract data from condition successfuly.')
+log('Extract data from condition successfuly.')
 
-print(f'[{str(dt.now())[:19]}] - EXTRACT DATA FROM SOURCE SUCCESSFULY')
+log('EXTRACT DATA FROM SOURCE SUCCESSFULY')

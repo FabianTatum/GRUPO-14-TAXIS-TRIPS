@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 #############################
 #--- ENV POSTGRES HEROKU ---#
@@ -80,7 +80,7 @@ do
         echo  "----------------------------------------"
         echo -e "------------------------------------------\n"
 
-        # Levantar container
+        #Levantar container
         cd database
 
 
