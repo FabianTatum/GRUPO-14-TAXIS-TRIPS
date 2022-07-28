@@ -4,16 +4,13 @@ El objetivo de este proyecto es  brindar un análisis tanto cuantitativo como  c
 
 ## KPI - Key Performance Indicators
 
-KPI	Métrica
-•	Medir horas más demandados del día 	AVG viajes/hora
-•	Medir días más demandados	AVG viajes/día de la semana
-•	Medir variaciones de demanda por clima	AVG viajes/clima
-•	Medir orígenes y destinos más demandados	Suma viajes con destino a cada borough
-Suma viajes de orígen para cada borough
-
-•	Evaluar montos de viajes cortos/largos	Monto $ /Distancia
-Monto $/Tiempo
-
+| KPI             | Métrica    
+|-------------------|-------------|
+| Medir horas más demandados del día | AVG viajes/hora |
+| Medir días más demandados | AVG viajes/día de la semana |
+| Medir variaciones de demanda en el tiempo | Variación de Cantidad de viajes |
+| Medir orígenes y destinos más demandados | Suma viajes con destino a cada borough |
+| Evaluar montos de viajes según distancia | Monto $ /Distancia Monto $/Tiempo |
 
 ## Análisis de KPIs
 
