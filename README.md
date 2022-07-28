@@ -4,6 +4,8 @@ El objetivo de este proyecto es  brindar un análisis tanto cuantitativo como  c
 
 ## KPI - Key Performance Indicators
 
+Se busca evaluar el comportamiento de la demanda mediante el análisis de las características inherentes a cada viaje en taxi. Se evaluarán las relaciones entre dichas características tales como: 
+
 | KPI             | Métrica    
 |-------------------|-------------|
 | Medir horas más demandados del día | AVG viajes/hora |
@@ -15,6 +17,8 @@ El objetivo de este proyecto es  brindar un análisis tanto cuantitativo como  c
 ## Análisis de KPIs
 
 La gráfica de la distribución de la cantidad de viajes respecto a los días de la semana nos dice que no hay gran variación entre ellos, y tal como se esperaba la demanda crece a medida que se acerca el fin de semana, siendo el domingo elde menor valor. A su vez, tambien se ve que el jueves es el tiene y siempre en un rango más acotado, el 50% de los jueves analizados tuvieron entre 38000 y 42800 viajes.
+
+![alt text]([https://raw.githubusercontent.com/username/projectname/branch/path/to/img.png](https://github.com/facundoallia/Analisis-NYC-Taxis/blob/main/assets/distribucion_viaje_dia.png))
 
 En la siguiente gráfica se observa, como se espera, una tendencia creciente en cuanto al numero de viajes conforme se aproximan los horarios de entrada y salida laboral , aunque de forma muy variable, es decir, a dichas horas se pueden efectuar muchos o pocos viajes.
 Luego, durante el período de 10hs a 16hs se requiere un número ciertamente acotado entre 10.000 y 17.000 viajes. Al aproximarse el horario de fin de jornada (17hs ~ 19hs) se observan los valores más elevados, llegando a efectuarse hasta 21.000 viajes por hora. Luego, conforme continúa el día la cantidad de viajes efectuados decrece hasta el próximo día a las 06hs.
