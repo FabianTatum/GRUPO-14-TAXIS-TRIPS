@@ -363,9 +363,9 @@ app.layout = html.Div(children=[
 
             html.Article(children=[
 
-                dcc.Graph(
-                    id='median_fig_ref',
-                    figure=median_trips_day_fig_ref
+                html.Img(
+                    src='./assets/lr_image.png',
+                    style={'width': '100%', 'height': '100%'}
                 ),
 
             ], className='service-card'
