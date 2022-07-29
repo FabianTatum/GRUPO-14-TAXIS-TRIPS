@@ -7,11 +7,11 @@ from simpledbf import Dbf5
 import datetime as date 
 
 #funcion para calcular outliers
-def outliers_obt(data, columna,cuartial1,cuartil2,valoriqr=1.5):
+def outliers_obt(data, columna,cuartial1,cuartil3,valoriqr=1.5):
     ##calculamos los cuartiles 
     Q1 = data[columna].quantile(float(cuartial1))
     #print('Primer Cuartile', Q1)
-    Q3 = data[columna].quantile(float(cuartil2))
+    Q3 = data[columna].quantile(float(cuartil3))
     #print('Tercer Cuartile',Q3)
     IQR = Q3 - Q1
     #print('Rango intercuartile', IQR)
