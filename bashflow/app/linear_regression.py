@@ -8,13 +8,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from logs import log
 
-def linear_regression_pred(value):
+def linear_regression_pred(value, df1):
 
-    taxi_api = db.conn(
-        '''
-            select * from taxi_trips;
-        ''' 
-    )
+    taxi_api = df1
 
     # TODO: Analisis
     # parte de abajo

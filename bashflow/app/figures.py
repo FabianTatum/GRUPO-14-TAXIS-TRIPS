@@ -157,8 +157,6 @@ def median_trips_day():
         '''
     )
     df = df1[['tpep_pickup_datetime']].copy()
-    del df1
-
 
     df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
 
@@ -196,7 +194,7 @@ def median_trips_day():
 
     fig.update_layout(title_text='Media de Viajes por Día')
 
-    return fig
+    return fig, df1
     
 
 
